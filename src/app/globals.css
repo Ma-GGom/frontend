@@ -1,0 +1,142 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --surface: #f8fbff;
+  --surface-card: #ffffff;
+  --surface-elevated: #f4f8ff;
+  --ink: #111827;
+  --ink-muted: #64748b;
+  --brand-blue: #6366f1;
+  --brand-cyan: #8b93ff;
+  --brand-orange: #ffb38a;
+  --border-soft: rgba(99, 102, 241, 0.16);
+  --border-brand: rgba(99, 102, 241, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(ellipse 980px 640px at 8% -8%, rgba(99, 102, 241, 0.27), transparent 62%),
+    radial-gradient(ellipse 760px 520px at 92% 6%, rgba(129, 140, 248, 0.24), transparent 63%),
+    radial-gradient(ellipse 720px 440px at 52% 108%, rgba(196, 181, 253, 0.26), transparent 70%);
+  color: var(--ink);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+.display-title {
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+/* 카드 글로우 효과 */
+.landing-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.landing-shell::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 28px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.3),
+    rgba(129, 140, 248, 0.18) 40%,
+    transparent 60%,
+    rgba(167, 139, 250, 0.2)
+  );
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 입장 애니메이션 */
+.landing-enter {
+  animation: rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.landing-enter-delay {
+  animation: rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+
+.landing-enter-delay-2 {
+  animation: rise-in 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s both;
+}
+
+@keyframes rise-in {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 네온 펄스 */
+@keyframes neon-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.neon-dot {
+  animation: neon-pulse 2s ease-in-out infinite;
+}
+
+/* 서버 상태바(원활) 은은한 물결 */
+@keyframes server-wave {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.45;
+  }
+  60% {
+    opacity: 0.18;
+  }
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+.server-wave {
+  position: absolute;
+  inset: -15% -60%;
+  background: linear-gradient(
+    100deg,
+    transparent 16%,
+    rgba(255, 255, 255, 0.2) 36%,
+    rgba(255, 255, 255, 0.78) 52%,
+    rgba(255, 255, 255, 0.16) 64%,
+    transparent 82%
+  );
+  filter: blur(0.6px);
+  animation: server-wave 2s ease-in-out infinite;
+}
+
+.server-wave-delay-1 {
+  animation-delay: 0.18s;
+}
+
+.server-wave-delay-2 {
+  animation-delay: 0.36s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .server-wave {
+    animation: none;
+  }
+}

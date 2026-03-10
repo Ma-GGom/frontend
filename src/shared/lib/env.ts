@@ -1,0 +1,7 @@
+const DEFAULT_API_BASE_URL = "http://localhost:8080/api/v1";
+const DEFAULT_AUTH_COOKIE_NAME = "maggom_auth_token";
+
+export const env = {
+  NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL,
+  NEXT_PUBLIC_AUTH_TOKEN_COOKIE_NAME: process.env.NEXT_PUBLIC_AUTH_TOKEN_COOKIE_NAME ?? DEFAULT_AUTH_COOKIE_NAME,
+} as const;

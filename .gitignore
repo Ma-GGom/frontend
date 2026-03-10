@@ -4,6 +4,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
@@ -49,6 +50,7 @@ web_modules/
 
 # Optional npm cache directory
 .npm
+.pnpm-store/
 
 # Optional eslint cache
 .eslintcache
@@ -65,10 +67,11 @@ web_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variable files
+# dotenv environment variable files (never commit)
 .env
 .env.*
-!.env.example
+.envrc
+.direnv/
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -137,3 +140,32 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Local run artifacts
+dev-server.log
+*.local.log
+
+# Editor/OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Deployment/build system
+.vercel/
+.turbo/
+
+# Private key/certificate files
+*.pem
+*.p12
+*.pfx
+*.key
+*.crt
+*.cer
+
+# AI shared context (outside-repo docs via junction/symlink)
+ai-context/
+AGENTS.md
+
+# Claude Code
+.claude/
