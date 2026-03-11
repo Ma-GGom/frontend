@@ -11,6 +11,23 @@ export function getAuthToken(): string | null {
   return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
 }
 
+export function getAuthTokenFromCookie(): string | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const cookieKey = `${env.NEXT_PUBLIC_AUTH_TOKEN_COOKIE_NAME}=`;
+  const matchedCookie = document.cookie
+    .split("; ")
+    .find((cookie) => cookie.startsWith(cookieKey));
+
+  if (!matchedCookie) {
+    return null;
+  }
+
+  return decodeURIComponent(matchedCookie.slice(cookieKey.length));
+}
+
 export function setAuthToken(token: string): void {
   if (typeof window === "undefined") {
     return;

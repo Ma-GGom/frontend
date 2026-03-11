@@ -12,7 +12,7 @@ export function useAuthActions() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const sendCode = async (email: string) => {
+  const sendCode = async (email: string): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);
@@ -21,8 +21,10 @@ export function useAuthActions() {
       const response = await authApi.sendCode({ email });
       setEmail(email);
       setMessage(`${response.message ?? "인증번호 발송 완료"} (유효시간: ${response.expires_in}초)`);
+      return true;
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "인증번호 발송에 실패했습니다.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -35,7 +37,7 @@ export function useAuthActions() {
       setMessage(null);
 
       const response = await authApi.verifyCode({ email, code });
-      setAuthToken(response.auth_token);
+      setAuthToken(response.access_token);
       setMessage(response.message ?? "인증이 완료되었습니다.");
       return response;
     } catch (caughtError) {

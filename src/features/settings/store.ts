@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SubscriptionPayload, SubscriptionResponse } from "@/features/subscription/types";
+import type { SubscriptionPayload, SubscriptionResponse } from "@/features/settings/types";
 
 interface SubscriptionState {
   form: SubscriptionPayload;
@@ -18,18 +18,18 @@ interface SubscriptionState {
 
 const defaultForm: SubscriptionPayload = {
   email: "",
-  receive_days: "MON,FRI",
+  receive_days: "MON,WED,FRI",
   receive_time: "08:00:00",
   pref_regions: ["수도권"],
-  pref_distances: ["10K"],
-  include_small: true,
+  pref_distances: ["10K", "HALF"],
+  include_small: false,
 };
 
 function uniqueValues(values: string[]): string[] {
   return Array.from(new Set(values));
 }
 
-export const useSubscriptionStore = create<SubscriptionState>((set) => ({
+export const useSettingsStore = create<SubscriptionState>((set) => ({
   form: defaultForm,
   hasExistingSubscription: false,
   setEmail: (email) =>

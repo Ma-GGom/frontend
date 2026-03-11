@@ -6,7 +6,7 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get(env.NEXT_PUBLIC_AUTH_TOKEN_COOKIE_NAME)?.value;
 
   if (!token) {
-    const url = new URL("/auth/email", request.url);
+    const url = new URL("/", request.url);
     return NextResponse.redirect(url);
   }
 
@@ -14,5 +14,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/subscription/:path*"],
+  matcher: ["/settings/:path*", "/subscription/:path*"],
 };

@@ -24,7 +24,7 @@ export function VerifyCodeForm() {
 
     const result = await verifyCode(email, code);
     if (result?.success) {
-      router.push("/subscription");
+      router.push("/settings");
     }
   };
 

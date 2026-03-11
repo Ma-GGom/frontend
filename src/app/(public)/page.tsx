@@ -1,5 +1,5 @@
-import { SubscriptionLanding } from "@/features/home/components/subscription-landing";
+import { Landing } from "@/features/home/components/landing";
 
 export default function HomePage() {
-  return <SubscriptionLanding />;
+  return <Landing />;
 }

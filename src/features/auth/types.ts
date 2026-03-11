@@ -14,5 +14,5 @@ export interface VerifyCodeRequest {
 }
 
 export interface VerifyCodeResponse extends ApiSuccessResponse {
-  auth_token: string;
+  access_token: string;
 }

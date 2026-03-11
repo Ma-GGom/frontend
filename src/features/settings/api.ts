@@ -1,8 +1,8 @@
 import { apiClient } from "@/shared/api/client";
 import { API_ENDPOINTS } from "@/shared/api/endpoints";
-import type { SubscriptionMutationResponse, SubscriptionPayload, SubscriptionResponse } from "@/features/subscription/types";
+import type { SubscriptionMutationResponse, SubscriptionPayload, SubscriptionResponse } from "@/features/settings/types";
 
-export const subscriptionApi = {
+export const settingsApi = {
   createSubscription(payload: SubscriptionPayload) {
     return apiClient.post<SubscriptionMutationResponse, SubscriptionPayload>(API_ENDPOINTS.subscriptions.create, payload);
   },
