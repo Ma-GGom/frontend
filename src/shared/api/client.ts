@@ -1,5 +1,5 @@
 import { env } from "@/shared/lib/env";
-import { getAuthToken } from "@/shared/lib/storage";
+import { clearAuthToken, getAuthToken } from "@/shared/lib/storage";
 import type { ApiError } from "@/types/api";
 
 type HttpMethod = "GET" | "POST" | "PATCH" | "DELETE";
@@ -75,6 +75,11 @@ class ApiClient {
     const responseBody = isJson ? await response.json() : await response.text();
 
     if (!response.ok) {
+      if (shouldUseAuth && response.status === 401 && typeof window !== "undefined") {
+        clearAuthToken();
+        window.location.replace("/");
+      }
+
       const errorMessage =
         typeof responseBody === "object" && responseBody !== null && "message" in responseBody
           ? String(responseBody.message)

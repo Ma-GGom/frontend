@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   clearSession: () => {
     clearAuthToken();
-    set({ authToken: null });
+    set({ authToken: null, email: "" });
   },
   hydrateAuthToken: () => {
     const token = getAuthToken();

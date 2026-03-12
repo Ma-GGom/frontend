@@ -5,14 +5,35 @@ interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "typ
 }
 
 export function Checkbox({ label, className = "", ...props }: CheckboxProps) {
+  const isDisabled = Boolean(props.disabled);
+  const isChecked = Boolean(props.checked ?? props.defaultChecked);
+
   return (
-    <label className={`inline-flex cursor-pointer items-center gap-2 text-sm text-slate-700 hover:cursor-pointer ${className}`}>
+    <label
+      className={`inline-flex select-none items-center gap-2 rounded-lg border bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 transition-colors ${
+        isChecked ? "border-indigo-400" : "border-gray-200"
+      } ${
+        isDisabled
+          ? "cursor-not-allowed opacity-50"
+          : "cursor-pointer hover:border-indigo-200 hover:bg-indigo-50/60"
+      } ${className}`}
+    >
       <input
-        className="h-4 w-4 cursor-pointer rounded border-slate-300 text-brand-600 focus:ring-brand-500 disabled:cursor-not-allowed"
+        className="peer sr-only"
         type="checkbox"
         {...props}
       />
-      <span>{label}</span>
+      <span className="inline-flex h-4 w-4 items-center justify-center rounded border border-gray-300 bg-white transition-colors peer-checked:border-indigo-500 peer-focus-visible:ring-2 peer-focus-visible:ring-indigo-200">
+        <svg
+          aria-hidden
+          className={`h-3.5 w-3.5 text-indigo-500 transition-all ${isChecked ? "scale-100 opacity-100" : "scale-75 opacity-0"}`}
+          fill="none"
+          viewBox="0 0 16 16"
+        >
+          <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
+        </svg>
+      </span>
+      <span className="leading-none">{label}</span>
     </label>
   );
 }

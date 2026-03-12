@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { settingsApi } from "@/features/settings/api";
-import type { SubscriptionPayload } from "@/features/settings/types";
+import type { SubscriptionUpdatePayload } from "@/features/settings/types";
 
 interface LoadMySubscriptionOptions {
   silent?: boolean;
@@ -29,33 +29,17 @@ export function useSettingsActions() {
     }
   }, []);
 
-  const createSubscription = useCallback(async (payload: SubscriptionPayload) => {
+  const updateSubscription = useCallback(async (payload: SubscriptionUpdatePayload) => {
     try {
       setLoading(true);
       setError(null);
       setMessage(null);
-      const response = await settingsApi.createSubscription(payload);
-      setMessage(response.message ?? "구독이 등록되었습니다.");
-      return response;
-    } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "구독 등록에 실패했습니다.");
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const updateSubscription = useCallback(async (payload: Partial<SubscriptionPayload>) => {
-    try {
-      setLoading(true);
-      setError(null);
-      setMessage(null);
-      const response = await settingsApi.updateSubscription(payload);
-      setMessage(response.message ?? "구독 설정이 변경되었습니다.");
-      return response;
+      await settingsApi.updateSubscription(payload);
+      setMessage("구독 설정이 변경되었습니다.");
+      return true;
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "구독 설정 변경에 실패했습니다.");
-      return null;
+      return false;
     } finally {
       setLoading(false);
     }
@@ -66,12 +50,12 @@ export function useSettingsActions() {
       setLoading(true);
       setError(null);
       setMessage(null);
-      const response = await settingsApi.deleteSubscription();
-      setMessage(response.message ?? "구독이 해지되었습니다.");
-      return response;
+      await settingsApi.deleteSubscription();
+      setMessage("구독이 해지되었습니다.");
+      return true;
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "구독 해지에 실패했습니다.");
-      return null;
+      return false;
     } finally {
       setLoading(false);
     }
@@ -82,7 +66,6 @@ export function useSettingsActions() {
     error,
     message,
     loadMySubscription,
-    createSubscription,
     updateSubscription,
     deleteSubscription,
   };

@@ -1,7 +1,4 @@
-import type { ApiSuccessResponse } from "@/types/api";
-
-export interface SubscriptionPayload {
-  email: string;
+export interface SubscriptionSettings {
   receive_days: string;
   receive_time: string;
   pref_regions: string[];
@@ -9,8 +6,5 @@ export interface SubscriptionPayload {
   include_small: boolean;
 }
 
-export type SubscriptionResponse = SubscriptionPayload;
-
-export interface SubscriptionMutationResponse extends ApiSuccessResponse {
-  member_id?: number;
-}
+export type SubscriptionResponse = SubscriptionSettings;
+export type SubscriptionUpdatePayload = Partial<SubscriptionSettings>;

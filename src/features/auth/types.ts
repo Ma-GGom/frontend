@@ -1,10 +1,12 @@
-import type { ApiSuccessResponse } from "@/types/api";
+export type AuthFlow = "SUBSCRIBE" | "SETTINGS";
 
 export interface SendCodeRequest {
   email: string;
+  flow: AuthFlow;
 }
 
-export interface SendCodeResponse extends ApiSuccessResponse {
+export interface SendCodeResponse {
+  message: string;
   expires_in: number;
 }
 
@@ -13,6 +15,6 @@ export interface VerifyCodeRequest {
   code: string;
 }
 
-export interface VerifyCodeResponse extends ApiSuccessResponse {
+export interface VerifyCodeResponse {
   access_token: string;
 }

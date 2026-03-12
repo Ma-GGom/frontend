@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useAuthActions } from "@/features/auth/hooks";
 import { useAuthStore } from "@/features/auth/store";
 import { fetchSubscriberCount } from "@/features/home/api";
@@ -13,7 +14,7 @@ import { Toast } from "@/shared/ui/toast";
 
 const CODE_EXPIRE_SECONDS = 180;
 const VERIFIED_STATUS_MESSAGE =
-  "인증이 완료됐어요.\n현재 기본 구독 설정이 적용되어 있으니\n원하는 정보를 받으려면 구독 설정에서 직접 수정해주세요.";
+  "인증이 완료됐어요.\n현재 기본 구독 설정이 적용되어 있으니\n원하는 정보를 받으려면 설정에서 직접 수정해주세요.";
 
 function formatCountdown(seconds: number): string {
   const minute = Math.floor(seconds / 60);
@@ -31,10 +32,12 @@ export function Landing() {
   const [codeTouched, setCodeTouched] = useState(false);
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [isPrivacyAgreed, setIsPrivacyAgreed] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [lastAttemptedCode, setLastAttemptedCode] = useState("");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [agreementError, setAgreementError] = useState<string | null>(null);
   const [subscriberCount, setSubscriberCount] = useState<number | null>(null);
   const [dismissedError, setDismissedError] = useState<string | null>(null);
   const { loading, error, sendCode, verifyCode } = useAuthActions();
@@ -49,10 +52,12 @@ export function Landing() {
       : codeTouched && !isCodeValid && verificationCode.length > 0
         ? "인증번호 6자리를 입력해주세요."
         : null);
-  const sendButtonDisabled = useMemo(
-    () => !isEmailValid || loading || isVerified,
-    [isEmailValid, loading, isVerified],
+  const isConsentRowLocked = isCodeSent && !isCodeExpired && !isVerified;
+  const sendCodeButtonDisabled = useMemo(
+    () => !isEmailValid || !isPrivacyAgreed || loading || isVerified,
+    [isEmailValid, isPrivacyAgreed, loading, isVerified],
   );
+  const formErrorMessage = agreementError ?? helperErrorMessage;
   const toastError = error && error !== dismissedError ? error : null;
 
   useEffect(() => {
@@ -61,9 +66,13 @@ export function Landing() {
     const readSubscriberCount = async () => {
       try {
         const data = await fetchSubscriberCount();
-        if (mounted) setSubscriberCount(data.count);
+        if (mounted) {
+          setSubscriberCount(data.count);
+        }
       } catch {
-        if (mounted) setSubscriberCount(null);
+        if (mounted) {
+          setSubscriberCount(null);
+        }
       }
     };
 
@@ -113,11 +122,16 @@ export function Landing() {
     setTouched(true);
     setDismissedError(null);
     setVerificationError(null);
+    setAgreementError(null);
     setStatusMessage(null);
 
     if (!isEmailValid) return;
+    if (!isPrivacyAgreed) {
+      setAgreementError("개인정보처리방침 동의가 필요해요.");
+      return;
+    }
 
-    const success = await sendCode(email);
+    const success = await sendCode(email, "SUBSCRIBE");
     if (success) {
       startVerificationFlow();
       setStatusMessage("인증번호를 전송했어요. 3분 안에 입력해주세요.");
@@ -146,15 +160,22 @@ export function Landing() {
     setLastAttemptedCode(targetCode);
 
     const result = await verifyCode(email, targetCode);
-    if (result?.success) {
+    if (result?.access_token) {
       setStoredEmail(email);
       setIsVerified(true);
       setStatusMessage(VERIFIED_STATUS_MESSAGE);
+      try {
+        const data = await fetchSubscriberCount();
+        setSubscriberCount(data.count);
+      } catch {
+        setSubscriberCount(null);
+      }
     }
   };
 
   const handleEmailChange = (nextEmail: string) => {
     setEmail(nextEmail);
+    setAgreementError(null);
     if (isCodeSent || isVerified) {
       resetVerificationFlow();
       setStatusMessage(null);
@@ -167,6 +188,8 @@ export function Landing() {
     setEmail("");
     setTouched(false);
     setDismissedError(null);
+    setIsPrivacyAgreed(false);
+    setAgreementError(null);
     setStatusMessage(null);
     resetVerificationFlow();
   };
@@ -206,11 +229,8 @@ export function Landing() {
             이 구독 중이에요.
           </p>
 
-          <form
-            className="flex w-full flex-col items-center gap-3 sm:grid sm:grid-cols-[112px_296px_112px] sm:items-center sm:justify-center sm:gap-2"
-            onSubmit={handleSendOrResend}
-          >
-            <div className="relative w-[88%] max-w-[296px] sm:col-start-2 sm:w-[296px] sm:max-w-none sm:-translate-x-1">
+          <form className="w-full space-y-3" onSubmit={handleSendOrResend}>
+            <div className="relative mx-auto w-[88%] max-w-[296px] sm:w-[408px] sm:max-w-none">
               <Input
                 autoComplete="email"
                 className={`${isVerified ? "cursor-not-allowed pr-10 opacity-60" : ""}`}
@@ -230,14 +250,56 @@ export function Landing() {
                 </span>
               )}
             </div>
-            <Button
-              className="w-[88%] max-w-[296px] sm:col-start-3 sm:w-[112px] sm:max-w-none"
-              disabled={sendButtonDisabled}
-              loading={loading}
-              type="submit"
-            >
-              {isVerified ? "인증 완료" : isCodeSent ? "재전송" : "구독하기"}
-            </Button>
+
+            <div className="mx-auto flex w-[88%] max-w-[296px] items-center justify-end gap-3 sm:w-[408px] sm:max-w-none">
+              <div className={`inline-flex items-center gap-1 ${isConsentRowLocked ? "opacity-55" : ""}`}>
+                <label
+                  className={`inline-flex h-8 w-8 select-none items-center justify-center ${
+                    isConsentRowLocked || isVerified ? "cursor-not-allowed" : "cursor-pointer"
+                  }`}
+                  htmlFor="privacy-agree"
+                >
+                  <input
+                    checked={isPrivacyAgreed}
+                    className="peer sr-only"
+                    disabled={isConsentRowLocked || isVerified || loading}
+                    id="privacy-agree"
+                    type="checkbox"
+                    onChange={(event) => {
+                      setIsPrivacyAgreed(event.target.checked);
+                      setAgreementError(null);
+                    }}
+                  />
+                  <span className="inline-flex h-5 w-5 items-center justify-center rounded-[6px] border border-gray-300 bg-white transition-colors peer-checked:border-indigo-500">
+                    <svg
+                      aria-hidden
+                      className={`h-4 w-4 text-indigo-500 transition-all ${isPrivacyAgreed ? "scale-100 opacity-100" : "scale-75 opacity-0"}`}
+                      fill="none"
+                      viewBox="0 0 16 16"
+                  >
+                    <path d="M3.5 8.5l3 3 6-7" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.2" />
+                  </svg>
+                </span>
+              </label>
+                <span className="text-xs font-medium leading-none text-gray-600 sm:text-sm">[필수]</span>
+                <Link
+                  className="text-xs font-medium leading-none text-gray-600 underline underline-offset-2 transition-colors hover:text-indigo-600 sm:text-sm"
+                  href="/privacy-policy"
+                >
+                  개인정보처리방침
+                </Link>
+                <span className="text-xs font-medium leading-none text-gray-600 sm:text-sm">동의</span>
+              </div>
+
+              <Button
+                className="h-10 w-auto min-w-[88px] whitespace-nowrap rounded-lg px-4 text-sm"
+                disabled={sendCodeButtonDisabled}
+                loading={loading}
+                type="submit"
+              >
+                {isVerified ? "인증 완료" : isCodeSent ? "재전송" : "구독하기"}
+              </Button>
+            </div>
           </form>
 
           {isCodeSent && !isVerified && (
@@ -286,7 +348,7 @@ export function Landing() {
           {touched && !isEmailValid && email.length > 0 && (
             <p className="text-xs text-red-600">올바른 이메일 형식을 입력해주세요.</p>
           )}
-          {helperErrorMessage && <p className="text-sm text-red-600">{helperErrorMessage}</p>}
+          {formErrorMessage && <p className="text-sm text-red-600">{formErrorMessage}</p>}
           {statusMessage && <p className="whitespace-pre-line text-sm text-emerald-700">{statusMessage}</p>}
           {isVerified && (
             <button

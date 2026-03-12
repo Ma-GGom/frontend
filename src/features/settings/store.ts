@@ -1,10 +1,9 @@
 import { create } from "zustand";
-import type { SubscriptionPayload, SubscriptionResponse } from "@/features/settings/types";
+import type { SubscriptionResponse, SubscriptionSettings } from "@/features/settings/types";
 
 interface SubscriptionState {
-  form: SubscriptionPayload;
+  form: SubscriptionSettings;
   hasExistingSubscription: boolean;
-  setEmail: (email: string) => void;
   setReceiveDays: (days: string[]) => void;
   toggleDay: (day: string) => void;
   setReceiveTime: (value: string) => void;
@@ -16,13 +15,12 @@ interface SubscriptionState {
   reset: () => void;
 }
 
-const defaultForm: SubscriptionPayload = {
-  email: "",
+const defaultForm: SubscriptionSettings = {
   receive_days: "MON,WED,FRI",
   receive_time: "08:00:00",
   pref_regions: ["수도권"],
   pref_distances: ["10K", "HALF"],
-  include_small: false,
+  include_small: true,
 };
 
 function uniqueValues(values: string[]): string[] {
@@ -32,10 +30,6 @@ function uniqueValues(values: string[]): string[] {
 export const useSettingsStore = create<SubscriptionState>((set) => ({
   form: defaultForm,
   hasExistingSubscription: false,
-  setEmail: (email) =>
-    set((state) => ({
-      form: { ...state.form, email },
-    })),
   setReceiveDays: (days) =>
     set((state) => ({
       form: { ...state.form, receive_days: uniqueValues(days).join(",") },

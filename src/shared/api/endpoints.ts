@@ -4,7 +4,7 @@ export const API_ENDPOINTS = {
     verifyCode: "/auth/email/verify",
   },
   subscriptions: {
-    create: "/subscriptions",
     me: "/subscriptions/me",
+    count: "/subscriptions/count",
   },
 } as const;

@@ -1,23 +1,25 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store";
 import { useSettingsActions } from "@/features/settings/hooks";
 import { useSettingsStore } from "@/features/settings/store";
-import type { SubscriptionPayload } from "@/features/settings/types";
 import { DISTANCE_OPTIONS } from "@/shared/constants/distances";
 import { RECEIVE_DAY_OPTIONS } from "@/shared/constants/receive-days";
 import { RECEIVE_TIME_SLOTS } from "@/shared/constants/receive-time-slots";
 import { REGION_OPTIONS } from "@/shared/constants/regions";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
+import { ConfirmModal } from "@/shared/ui/confirm-modal";
 import { Toast } from "@/shared/ui/toast";
 
 export function SettingsForm() {
-  const savedEmail = useAuthStore((state) => state.email);
+  const router = useRouter();
+  const authToken = useAuthStore((state) => state.authToken);
+  const clearSession = useAuthStore((state) => state.clearSession);
   const form = useSettingsStore((state) => state.form);
   const hasExistingSubscription = useSettingsStore((state) => state.hasExistingSubscription);
-  const setEmail = useSettingsStore((state) => state.setEmail);
   const toggleDay = useSettingsStore((state) => state.toggleDay);
   const setReceiveTime = useSettingsStore((state) => state.setReceiveTime);
   const toggleRegion = useSettingsStore((state) => state.toggleRegion);
@@ -26,14 +28,10 @@ export function SettingsForm() {
   const markExistingSubscription = useSettingsStore((state) => state.markExistingSubscription);
   const resetForm = useSettingsStore((state) => state.reset);
 
-  const { loading, error, message, loadMySubscription, createSubscription, updateSubscription, deleteSubscription } = useSettingsActions();
+  const { loading, error, message, loadMySubscription, updateSubscription, deleteSubscription } = useSettingsActions();
   const [dismissedError, setDismissedError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (savedEmail) {
-      setEmail(savedEmail);
-    }
-  }, [savedEmail, setEmail]);
+  const [dismissedMessage, setDismissedMessage] = useState<string | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -50,41 +48,34 @@ export function SettingsForm() {
     return () => {
       mounted = false;
     };
-  }, [applyResponse, loadMySubscription]);
+  }, [applyResponse, authToken, loadMySubscription]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setDismissedError(null);
+    setDismissedMessage(null);
 
-    const payload: SubscriptionPayload = {
-      ...form,
-      include_small: false,
-    };
-
-    if (hasExistingSubscription) {
-      const response = await updateSubscription(payload);
-      if (response?.success) {
-        markExistingSubscription(true);
-      }
-      return;
-    }
-
-    const response = await createSubscription(payload);
-    if (response?.success) {
+    const updated = await updateSubscription(form);
+    if (updated) {
       markExistingSubscription(true);
     }
   };
 
   const handleDelete = async () => {
     setDismissedError(null);
-    const response = await deleteSubscription();
-    if (response?.success) {
+    setDismissedMessage(null);
+    const deleted = await deleteSubscription();
+    if (deleted) {
+      clearSession();
       resetForm();
+      setIsDeleteConfirmOpen(false);
+      router.replace("/");
     }
   };
 
   const selectedDays = form.receive_days.split(",").filter(Boolean);
   const toastError = error && error !== dismissedError ? error : null;
+  const toastMessage = message && message !== dismissedMessage ? message : null;
 
   return (
     <div className="space-y-4">
@@ -100,7 +91,7 @@ export function SettingsForm() {
                   <Checkbox
                     key={day.value}
                     checked={selectedDays.includes(day.value)}
-                    className="rounded-lg border border-gray-200 px-1 py-1.5 text-xs font-medium text-gray-700"
+                    className="text-xs"
                     label={day.label}
                     onChange={() => toggleDay(day.value)}
                   />
@@ -144,7 +135,7 @@ export function SettingsForm() {
                   <Checkbox
                     key={region}
                     checked={form.pref_regions.includes(region)}
-                    className="rounded-lg border border-gray-200 px-1.5 py-1.5 text-xs font-medium text-gray-700"
+                    className="text-xs"
                     label={region}
                     onChange={() => toggleRegion(region)}
                   />
@@ -159,7 +150,7 @@ export function SettingsForm() {
                   <Checkbox
                     key={distance}
                     checked={form.pref_distances.includes(distance)}
-                    className="rounded-lg border border-gray-200 px-1.5 py-1.5 text-xs font-medium text-gray-700"
+                    className="text-xs"
                     label={distance}
                     onChange={() => toggleDistance(distance)}
                   />
@@ -172,11 +163,11 @@ export function SettingsForm() {
         <section className="pt-1">
           <div className="flex justify-start">
             <Button
-              className="h-9 w-auto rounded-lg bg-rose-600 px-3 text-sm shadow-[0_8px_18px_rgba(225,29,72,0.24)] hover:bg-rose-500 hover:shadow-[0_10px_20px_rgba(225,29,72,0.28)] disabled:bg-rose-200"
+              className="h-9 w-auto rounded-lg bg-rose-500 px-3 text-sm shadow-none transition-colors hover:bg-rose-600 hover:shadow-none disabled:bg-rose-200"
               disabled={!hasExistingSubscription || loading}
               loading={loading}
               type="button"
-              onClick={handleDelete}
+              onClick={() => setIsDeleteConfirmOpen(true)}
             >
               구독 해지
             </Button>
@@ -184,12 +175,31 @@ export function SettingsForm() {
         </section>
       </form>
 
-      {message && <p className="text-sm text-emerald-700">{message}</p>}
+      <ConfirmModal
+        cancelLabel="취소"
+        confirmLabel="해지하기"
+        description="구독을 해지하면 알림 메일이 더 이상 발송되지 않습니다."
+        loading={loading}
+        open={isDeleteConfirmOpen}
+        title="구독을 해지할까요?"
+        onCancel={() => setIsDeleteConfirmOpen(false)}
+        onConfirm={() => {
+          void handleDelete();
+        }}
+      />
+
       {toastError && (
         <Toast
           message={toastError}
           variant="error"
           onClose={() => setDismissedError(toastError)}
+        />
+      )}
+      {!toastError && toastMessage && (
+        <Toast
+          message={toastMessage}
+          variant="success"
+          onClose={() => setDismissedMessage(toastMessage)}
         />
       )}
     </div>

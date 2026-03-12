@@ -1,26 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store";
 import { SettingsAuthModal } from "@/features/home/components/settings-auth-modal";
-import { getAuthTokenFromCookie } from "@/shared/lib/storage";
+import { getAuthTokenFromCookie, getEmailFromAccessToken } from "@/shared/lib/storage";
 import { Button } from "@/shared/ui/button";
 
 export function LandingHeader() {
   const router = useRouter();
-  const hydrateAuthToken = useAuthStore((state) => state.hydrateAuthToken);
+  const setEmail = useAuthStore((state) => state.setEmail);
+  const clearSession = useAuthStore((state) => state.clearSession);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  useEffect(() => {
-    hydrateAuthToken();
-  }, [hydrateAuthToken]);
 
   const handleSettingsClick = () => {
     const cookieToken = getAuthTokenFromCookie();
-    if (cookieToken) {
+    const tokenEmail = getEmailFromAccessToken(cookieToken);
+
+    if (cookieToken && tokenEmail) {
+      setEmail(tokenEmail);
       router.push("/settings");
       return;
+    }
+
+    if (cookieToken && !tokenEmail) {
+      clearSession();
     }
 
     setIsAuthModalOpen(true);

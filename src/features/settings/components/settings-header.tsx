@@ -1,14 +1,33 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store";
-import { useSettingsStore } from "@/features/settings/store";
+import { SettingsAuthModal } from "@/features/home/components/settings-auth-modal";
+import { getAuthTokenFromCookie, getEmailFromAccessToken } from "@/shared/lib/storage";
 
 export function SettingsHeader() {
   const router = useRouter();
   const authEmail = useAuthStore((state) => state.email);
-  const formEmail = useSettingsStore((state) => state.form.email);
-  const email = formEmail || authEmail;
+  const setAuthEmail = useAuthStore((state) => state.setEmail);
+  const clearAuthSession = useAuthStore((state) => state.clearSession);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const cookieToken = useMemo(() => getAuthTokenFromCookie(), []);
+  const tokenEmail = useMemo(() => getEmailFromAccessToken(cookieToken), [cookieToken]);
+  const email = authEmail || tokenEmail;
+
+  useEffect(() => {
+    if (!authEmail && tokenEmail) {
+      setAuthEmail(tokenEmail);
+    }
+  }, [authEmail, setAuthEmail, tokenEmail]);
+
+  useEffect(() => {
+    if (cookieToken && !tokenEmail) {
+      clearAuthSession();
+      router.replace("/");
+    }
+  }, [clearAuthSession, cookieToken, router, tokenEmail]);
 
   const handleBack = () => {
     if (window.history.length > 1) {
@@ -19,7 +38,7 @@ export function SettingsHeader() {
   };
 
   return (
-    <header className="mb-3 border-b border-indigo-100 pb-3 sm:mb-4 sm:pb-4">
+    <header className="mb-1 pb-1 sm:mb-2 sm:pb-2">
       <div className="mb-2 flex items-center justify-between">
         <button
           aria-label="뒤로가기"
@@ -29,24 +48,63 @@ export function SettingsHeader() {
         >
           ⟵
         </button>
-        <div className="rounded-xl border border-indigo-100 bg-indigo-50/70 px-3 py-1.5">
-          <p className="text-sm font-semibold uppercase tracking-wide text-indigo-500">현재 이메일</p>
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50/70 px-3 py-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-semibold uppercase tracking-wide text-indigo-500">현재 이메일</p>
+            <button
+              className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 underline underline-offset-2 transition-colors hover:text-indigo-500"
+              type="button"
+              onClick={() => setIsAuthModalOpen(true)}
+            >
+              <svg
+                aria-hidden
+                className="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 16 16"
+              >
+                <path
+                  d="M13.2 6.1A5.2 5.2 0 0 0 4.4 3.7L3 5.1M2.8 9.9a5.2 5.2 0 0 0 8.8 2.4L13 10.9"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                />
+                <path
+                  d="M3 2.9v2.3h2.3M13 13.1v-2.3h-2.3"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.5"
+                />
+              </svg>
+              <span>이메일 변경</span>
+            </button>
+          </div>
           <p className={`max-w-[240px] truncate text-lg font-semibold ${email ? "text-gray-700" : "text-gray-500"}`}>
             {email || "unknown"}
           </p>
         </div>
       </div>
 
-      <div className="mt-0.5 flex items-end justify-between gap-3">
+      <div className="mt-0.5">
         <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">설정</h1>
-        <button
-          className="inline-flex h-9 w-auto shrink-0 items-center justify-center rounded-lg bg-indigo-500 px-4 -mb-2 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(99,102,241,0.25)] transition-colors hover:bg-indigo-400"
-          form="settings-form"
-          type="submit"
-        >
-          저장
-        </button>
+        <div className="mt-1.5 flex justify-end">
+          <button
+            className="inline-flex h-9 w-auto shrink-0 items-center justify-center rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(99,102,241,0.25)] transition-colors hover:bg-indigo-400"
+            form="settings-form"
+            type="submit"
+          >
+            저장
+          </button>
+        </div>
       </div>
+      {isAuthModalOpen && (
+        <SettingsAuthModal
+          currentEmail={email || undefined}
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={() => setIsAuthModalOpen(false)}
+        />
+      )}
     </header>
   );
 }

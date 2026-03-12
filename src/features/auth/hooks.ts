@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { authApi } from "@/features/auth/api";
 import { useAuthStore } from "@/features/auth/store";
+import type { AuthFlow } from "@/features/auth/types";
 
 export function useAuthActions() {
   const setEmail = useAuthStore((state) => state.setEmail);
@@ -12,13 +13,13 @@ export function useAuthActions() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  const sendCode = async (email: string): Promise<boolean> => {
+  const sendCode = async (email: string, flow: AuthFlow = "SUBSCRIBE"): Promise<boolean> => {
     try {
       setLoading(true);
       setError(null);
       setMessage(null);
 
-      const response = await authApi.sendCode({ email });
+      const response = await authApi.sendCode({ email, flow });
       setEmail(email);
       setMessage(`${response.message ?? "인증번호 발송 완료"} (유효시간: ${response.expires_in}초)`);
       return true;
@@ -38,7 +39,7 @@ export function useAuthActions() {
 
       const response = await authApi.verifyCode({ email, code });
       setAuthToken(response.access_token);
-      setMessage(response.message ?? "인증이 완료되었습니다.");
+      setMessage("인증이 완료되었습니다.");
       return response;
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : "인증 검증에 실패했습니다.");
