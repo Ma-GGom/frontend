@@ -14,7 +14,7 @@ import { Toast } from "@/shared/ui/toast";
 
 const CODE_EXPIRE_SECONDS = 180;
 const VERIFIED_STATUS_MESSAGE =
-  "인증이 완료됐어요.\n현재 기본 구독 설정이 적용되어 있으니\n원하는 정보를 받으려면 설정에서 직접 수정해주세요.";
+  "인증이 완료됐어요.";
 
 function formatCountdown(seconds: number): string {
   const minute = Math.floor(seconds / 60);
@@ -210,12 +210,12 @@ export function Landing() {
 
         {/* 메인 헤드라인 */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-black leading-tight tracking-tight text-gray-800 sm:text-6xl lg:text-7xl">
+          <h1 className="text-4xl font-black leading-tight tracking-tight text-gray-800 sm:text-6xl lg:text-6xl">
             <span className="text-indigo-500">마</span>라톤 <span className="text-indigo-500">꼼</span>짝마!
           </h1>
-          <p className="mx-auto max-w-lg text-base font-semibold leading-relaxed text-gray-500 sm:text-lg">
+          <p className="mx-auto max-w-lg text-base font-semibold leading-relaxed text-gray-400 sm:text-lg">
             <span className="block">마라톤 접수 오픈, 이제 놓치지 마세요.</span>
-            <span className="block">원하는 대회를 원하는 시간에 이메일로 받아보세요.</span>
+            <span className="block">다양한 대회를 원하는 시간에 이메일로 받아보세요.</span>
           </p>
         </div>
 

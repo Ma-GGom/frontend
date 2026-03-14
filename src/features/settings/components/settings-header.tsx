@@ -1,10 +1,60 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/features/auth/store";
 import { SettingsAuthModal } from "@/features/home/components/settings-auth-modal";
 import { getAuthTokenFromCookie, getEmailFromAccessToken } from "@/shared/lib/storage";
+
+interface AccessTokenPayload {
+  role?: unknown;
+  roles?: unknown;
+  authorities?: unknown;
+}
+
+function decodeAccessTokenPayload(token: string | null): AccessTokenPayload | null {
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payloadSegment = token.split(".")[1];
+    if (!payloadSegment) {
+      return null;
+    }
+
+    const normalizedPayload = payloadSegment.replace(/-/g, "+").replace(/_/g, "/");
+    const paddedPayload = normalizedPayload.padEnd(Math.ceil(normalizedPayload.length / 4) * 4, "=");
+    return JSON.parse(atob(paddedPayload)) as AccessTokenPayload;
+  } catch {
+    return null;
+  }
+}
+
+function collectRoleValues(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.filter((item): item is string => typeof item === "string");
+  }
+  return [];
+}
+
+function hasAdminRole(payload: AccessTokenPayload | null): boolean {
+  if (!payload) {
+    return false;
+  }
+
+  const roles = [
+    ...collectRoleValues(payload.role),
+    ...collectRoleValues(payload.roles),
+    ...collectRoleValues(payload.authorities),
+  ].map((role) => role.trim().toUpperCase());
+
+  return roles.includes("ADMIN") || roles.includes("ROLE_ADMIN");
+}
 
 export function SettingsHeader() {
   const router = useRouter();
@@ -14,7 +64,9 @@ export function SettingsHeader() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const cookieToken = useMemo(() => getAuthTokenFromCookie(), []);
   const tokenEmail = useMemo(() => getEmailFromAccessToken(cookieToken), [cookieToken]);
+  const tokenPayload = useMemo(() => decodeAccessTokenPayload(cookieToken), [cookieToken]);
   const email = authEmail || tokenEmail;
+  const isAdminAccount = useMemo(() => hasAdminRole(tokenPayload), [tokenPayload]);
 
   useEffect(() => {
     if (!authEmail && tokenEmail) {
@@ -30,10 +82,6 @@ export function SettingsHeader() {
   }, [clearAuthSession, cookieToken, router, tokenEmail]);
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-      return;
-    }
     router.push("/");
   };
 
@@ -88,7 +136,15 @@ export function SettingsHeader() {
 
       <div className="mt-0.5">
         <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">설정</h1>
-        <div className="mt-1.5 flex justify-end">
+        <div className="mt-1.5 flex items-center justify-between gap-3">
+          {isAdminAccount && (
+            <Link
+              className="text-xs font-semibold text-gray-600 underline underline-offset-2 transition-colors hover:text-indigo-600"
+              href="/admin"
+            >
+              관리자 페이지
+            </Link>
+          )}
           <button
             className="inline-flex h-9 w-auto shrink-0 items-center justify-center rounded-lg bg-indigo-500 px-4 text-sm font-semibold text-white shadow-[0_8px_18px_rgba(99,102,241,0.25)] transition-colors hover:bg-indigo-400"
             form="settings-form"
