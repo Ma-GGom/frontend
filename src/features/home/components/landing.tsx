@@ -214,8 +214,8 @@ export function Landing() {
             <span className="text-indigo-500">마</span>라톤 <span className="text-indigo-500">꼼</span>짝마!
           </h1>
           <p className="mx-auto max-w-lg text-base font-semibold leading-relaxed text-gray-400 sm:text-lg">
-            <span className="block">마라톤 접수 오픈, 이제 놓치지 마세요.</span>
-            <span className="block">다양한 대회를 원하는 시간에 이메일로 받아보세요.</span>
+            <span className="block">마라톤 접수 오픈, 이제 놓치지 마세요</span>
+            <span className="block">다양한 대회를 원하는 시간에 이메일로 받아보세요</span>
           </p>
         </div>
 
@@ -226,7 +226,7 @@ export function Landing() {
             <span className="font-bold text-indigo-500">
               {subscriberCount === null ? "—" : subscriberCount.toLocaleString("ko-KR")}명
             </span>
-            이 구독 중이에요.
+            이 마꼼을 구독하고 있어요
           </p>
 
           <form className="w-full space-y-3" onSubmit={handleSendOrResend}>

@@ -58,13 +58,14 @@ function hasAdminRole(payload: AccessTokenPayload | null): boolean {
 
 export function SettingsHeader() {
   const router = useRouter();
+  const authToken = useAuthStore((state) => state.authToken);
   const authEmail = useAuthStore((state) => state.email);
   const setAuthEmail = useAuthStore((state) => state.setEmail);
   const clearAuthSession = useAuthStore((state) => state.clearSession);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const cookieToken = useMemo(() => getAuthTokenFromCookie(), []);
-  const tokenEmail = useMemo(() => getEmailFromAccessToken(cookieToken), [cookieToken]);
-  const tokenPayload = useMemo(() => decodeAccessTokenPayload(cookieToken), [cookieToken]);
+  const activeToken = useMemo(() => authToken ?? getAuthTokenFromCookie(), [authToken]);
+  const tokenEmail = useMemo(() => getEmailFromAccessToken(activeToken), [activeToken]);
+  const tokenPayload = useMemo(() => decodeAccessTokenPayload(activeToken), [activeToken]);
   const email = authEmail || tokenEmail;
   const isAdminAccount = useMemo(() => hasAdminRole(tokenPayload), [tokenPayload]);
 
@@ -75,11 +76,11 @@ export function SettingsHeader() {
   }, [authEmail, setAuthEmail, tokenEmail]);
 
   useEffect(() => {
-    if (cookieToken && !tokenEmail) {
+    if (activeToken && !tokenEmail) {
       clearAuthSession();
       router.replace("/");
     }
-  }, [clearAuthSession, cookieToken, router, tokenEmail]);
+  }, [activeToken, clearAuthSession, router, tokenEmail]);
 
   const handleBack = () => {
     router.push("/");
@@ -136,7 +137,7 @@ export function SettingsHeader() {
 
       <div className="mt-0.5">
         <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">설정</h1>
-        <div className="mt-1.5 flex items-center justify-between gap-3">
+        <div className={`mt-1.5 flex items-center gap-3 ${isAdminAccount ? "justify-between" : "justify-end"}`}>
           {isAdminAccount && (
             <Link
               className="text-xs font-semibold text-gray-600 underline underline-offset-2 transition-colors hover:text-indigo-600"
