@@ -10,27 +10,18 @@ export function AppFooter({ className = "" }: AppFooterProps) {
       <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-2 text-center">
         <div className="flex items-center gap-3 text-xs font-medium text-gray-600">
           <Link
-            className="transition-colors hover:text-indigo-600"
+            className="transition-colors hover:text-indigo-600 hover:underline hover:underline-offset-2"
             href="/privacy-policy"
           >
             개인정보처리방침
           </Link>
           <span className="text-gray-400">|</span>
-          <a
-            className="transition-colors hover:text-indigo-600"
-            href="mailto:maggom.team@gmail.com"
+          <Link
+            className="transition-colors hover:text-indigo-600 hover:underline hover:underline-offset-2"
+            href="/contact"
           >
-            maggom.team@gmail.com
-          </a>
-          <span className="text-gray-400">|</span>
-          <a
-            className="transition-colors hover:text-indigo-600"
-            href="https://github.com/Ma-GGom"
-            rel="noreferrer"
-            target="_blank"
-          >
-            GitHub
-          </a>
+            Contact
+          </Link>
         </div>
         <p className="text-xs font-medium tracking-wide text-gray-600">
           Copyright © {new Date().getFullYear()} 마꼼. All rights reserved.
