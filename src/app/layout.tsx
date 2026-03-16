@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     "러닝",
     "대회 알림",
     "마꼼",
+    "마라톤 꼼짝마"
   ],
   alternates: {
     canonical: "/",
