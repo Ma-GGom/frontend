@@ -50,15 +50,15 @@ export function Toast({ message, onClose, variant = "error" }: ToastProps) {
     <div
       aria-live="polite"
       role="status"
-      className={`fixed left-1/2 top-6 z-50 -translate-x-1/2 transition-all duration-300 ${
+      className={`fixed inset-x-0 top-6 z-50 flex justify-center px-3 transition-all duration-300 ${
         visible ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
       }`}
     >
-      <div className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-[0_8px_24px_rgba(99,102,241,0.18)] ${tone.container}`}>
+      <div className={`flex w-full max-w-[28rem] items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-[0_8px_24px_rgba(99,102,241,0.18)] ${tone.container}`}>
         <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold leading-none ${tone.iconBg} ${tone.iconClass}`}>
           {tone.icon}
         </span>
-        <p className="font-medium">{message}</p>
+        <p className="min-w-0 flex-1 break-keep text-left font-medium leading-5">{message}</p>
       </div>
     </div>
   );
