@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AppFooter } from "@/shared/ui/footer";
+
+export const metadata: Metadata = {
+  title: "개인정보처리방침",
+  description: "마꼼 서비스의 개인정보 처리방침 안내 페이지입니다.",
+  alternates: {
+    canonical: "/privacy-policy",
+  },
+};
 
 export default function PrivacyPolicyPage() {
   return (

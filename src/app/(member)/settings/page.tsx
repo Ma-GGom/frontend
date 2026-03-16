@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import { SettingsForm } from "@/features/settings/components/settings-form";
 import { SettingsHeader } from "@/features/settings/components/settings-header";
 import { AppFooter } from "@/shared/ui/footer";
+
+export const metadata: Metadata = {
+  title: "설정",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
+};
 
 export default function SettingsPage() {
   return (

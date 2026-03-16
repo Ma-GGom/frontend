@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AppFooter } from "@/shared/ui/footer";
+
+export const metadata: Metadata = {
+  title: "문의",
+  description: "마꼼 공식 이메일, GitHub, 후원 링크를 확인할 수 있는 Contact 페이지입니다.",
+  alternates: {
+    canonical: "/contact",
+  },
+};
 
 export default function ContactPage() {
   return (
@@ -15,9 +24,9 @@ export default function ContactPage() {
           </Link>
         </div>
 
-        <div className="space-y-5 text-sm leading-7 text-gray-700">
-          <section className="space-y-1">
-            <h2 className="text-base font-bold text-gray-900">공식 이메일</h2>
+        <div className="space-y-7 text-sm leading-7 text-gray-700">
+          <section>
+            <h2 className="text-base font-semibold text-gray-900">이메일</h2>
             <a
               className="font-semibold text-indigo-600 underline underline-offset-2 hover:text-indigo-500"
               href="mailto:maggom.team@gmail.com"
@@ -26,8 +35,8 @@ export default function ContactPage() {
             </a>
           </section>
 
-          <section className="space-y-1">
-            <h2 className="text-base font-bold text-gray-900">GitHub</h2>
+          <section>
+            <h2 className="text-base font-semibold text-gray-900">GitHub</h2>
             <a
               className="font-semibold text-indigo-600 underline underline-offset-2 hover:text-indigo-500"
               href="https://github.com/Ma-GGom"
@@ -38,16 +47,16 @@ export default function ContactPage() {
             </a>
           </section>
 
-          <section className="space-y-2">
-            <h2 className="text-base font-bold text-gray-900">Support</h2>
-            <p>이 서비스가 도움이 되셨다면, 커피 한 잔으로 응원해 주세요.</p>
+          <section className="space-y-1">
+            <h2 className="text-base font-semibold text-gray-900">Support</h2>
+            <p>이 서비스가 도움이 되셨다면, 커피 한 잔으로 응원해 주세요 🩵</p>
             <a
               className="inline-flex h-10 items-center rounded-lg border border-indigo-200 bg-indigo-50 px-4 text-sm font-semibold text-indigo-700 transition-colors hover:bg-indigo-100"
               href="https://ctee.kr/place/fakerdeft/donation"
               rel="noreferrer"
               target="_blank"
             >
-              커피 한 잔 후원하기
+              커피 한 잔으로 응원하기
             </a>
           </section>
         </div>

@@ -1,6 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { AdminMailTestPanel } from "@/features/admin/components/admin-mail-test-panel";
 import { AppFooter } from "@/shared/ui/footer";
+
+export const metadata: Metadata = {
+  title: "관리자",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
+};
 
 export default function AdminPage() {
   return (
