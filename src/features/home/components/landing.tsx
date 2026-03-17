@@ -13,8 +13,9 @@ import { Input } from "@/shared/ui/input";
 import { Toast } from "@/shared/ui/toast";
 
 const CODE_EXPIRE_SECONDS = 180;
+const CODE_SENT_STATUS_MESSAGE = "인증번호를 전송했어요. 3분 안에 입력해주세요.";
 const VERIFIED_STATUS_MESSAGE =
-  "인증이 완료됐어요.";
+  "인증이 완료됐어요.\n설정에서 원하는 조건으로 수신 정보를 바꿔보세요.";
 
 function formatCountdown(seconds: number): string {
   const minute = Math.floor(seconds / 60);
@@ -57,6 +58,8 @@ export function Landing() {
     () => !isEmailValid || !isPrivacyAgreed || loading || isVerified,
     [isEmailValid, isPrivacyAgreed, loading, isVerified],
   );
+  const visibleStatusMessage =
+    isCodeExpired && statusMessage === CODE_SENT_STATUS_MESSAGE ? null : statusMessage;
   const formErrorMessage = agreementError ?? helperErrorMessage;
   const toastError = error && error !== dismissedError ? error : null;
 
@@ -134,7 +137,7 @@ export function Landing() {
     const success = await sendCode(email, "SUBSCRIBE");
     if (success) {
       startVerificationFlow();
-      setStatusMessage("인증번호를 전송했어요. 3분 안에 입력해주세요.");
+      setStatusMessage(CODE_SENT_STATUS_MESSAGE);
     }
   };
 
@@ -308,7 +311,7 @@ export function Landing() {
                 <div className="min-w-0 flex-1">
                   <Input
                     className="w-full min-w-0 text-center"
-                    disabled={isVerified}
+                    disabled={isVerified || loading}
                     inputMode="numeric"
                     maxLength={6}
                     pattern="\d{6}"
@@ -349,7 +352,7 @@ export function Landing() {
             <p className="text-xs text-red-600">올바른 이메일 형식을 입력해주세요.</p>
           )}
           {formErrorMessage && <p className="text-sm text-red-600">{formErrorMessage}</p>}
-          {statusMessage && <p className="whitespace-pre-line text-sm text-emerald-700">{statusMessage}</p>}
+          {visibleStatusMessage && <p className="whitespace-pre-line text-sm text-emerald-700">{visibleStatusMessage}</p>}
           {isVerified && (
             <button
               className="text-xs font-semibold text-gray-500 underline underline-offset-2 transition-colors hover:text-gray-700"
